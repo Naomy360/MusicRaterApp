@@ -35,16 +35,12 @@ const Index = ({ route }) => {
       console.error('Error fetching songs:', error);
     }
   };
+  
   const isValidRating = (rating) => {
     const num = parseInt(rating, 10);
     return num >= 1 && num <= 5;
   };
   
-
-  const isValidRating = (rating) => {
-    const num = parseInt(rating, 10);
-    return num >= 1 && num <= 5;
-  };
 
   const handleAddSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
