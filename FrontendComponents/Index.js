@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 const Index = ({ route }) => {
 
@@ -12,6 +13,11 @@ const Index = ({ route }) => {
   const [newSong, setNewSong] = useState({ artist: '', song: '', rating: '' });
   const [updateSong, setUpdateSong] = useState({ id: '', artist: '', song: '', rating: '' });
   const [ratingThreshold, setRatingThreshold] = useState('');
+  const navigation = useNavigation();
+
+  const handleExit = () => {
+    navigation.navigate('Login');
+  };
 
   useEffect(() => {
     fetchSongs();
@@ -80,7 +86,6 @@ const Index = ({ route }) => {
         rating: songData.rating,
         username: loggedInUsername
       });
-
       if (response.data && response.data.success) {
         console.log('Rating updated successfully:', response.data.message);
         setUpdateSong({ id: '', artist: '', song: '', rating: '' });
@@ -114,7 +119,8 @@ const Index = ({ route }) => {
     }
   };
 
-
+  
+  
   const FilteredSongList = () => {
     const filteredSongs = songs.filter(song => song.rating >= parseInt(ratingThreshold, 10) || ratingThreshold === '');
 
@@ -255,7 +261,6 @@ const Index = ({ route }) => {
       </View>
     );
   };
-  
 
 
   const DeleteConfirmation = () => (
@@ -319,41 +324,6 @@ const Index = ({ route }) => {
     }
   };
 
-  const SongDetails = () => {
-    // Ensure selectedSong is not null
-    if (!selectedSong) return null;
-  
-    return (
-      <View style={styles.songDetailContainer}>
-        <Text style={styles.songDetailTitle}>{selectedSong.song} by {selectedSong.artist}</Text>
-        <Text style={styles.songDetailText}>Rating: {selectedSong.rating}</Text>
-        {/* Add any other details you want to display here */}
-        
-        {/* Button to go back to the list */}
-        <TouchableOpacity style={styles.backButton} onPress={() => setCurrentView('list')}>
-          <Text style={styles.buttonText}>Back to List</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
- 
-
-  const renderContent = () => {
-    switch (currentView) {
-      case 'list':
-        return <SongList />;
-      case 'add':
-        return <AddSongForm />;
-      case 'update':
-        return <UpdateSongForm />;
-      case 'delete':
-        return <DeleteConfirmation />;
-      case 'details': // New case for song details
-        return <SongDetails />;
-      default:
-        return <SongList />;
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -364,8 +334,12 @@ const Index = ({ route }) => {
           <Text style={styles.buttonText}>Add New Rating</Text>
         </TouchableOpacity>
       )}
+       <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
+        <Text style={styles.buttonText}>Exit</Text>
+      </TouchableOpacity>
     </View>
   );
+ 
 };
 
   
@@ -501,6 +475,14 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginVertical: 10,
+  },
+  exitButton: {
+    backgroundColor: '#d9534f',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginBottom: 10,
   },
 });
 
