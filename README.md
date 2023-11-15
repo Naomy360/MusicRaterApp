@@ -51,7 +51,7 @@ The application first asks the user to either create an account or login with th
 ### Accessing the Application
 
 1. **Configure IP Addresses**:
-   - We hardcoded our own IP addresses.Make sure to update the IP addresses in `Signup.js`, `Login.js`, and `Index.js` to reflect your development environment.
+   - We hardcoded our own IP addresses. Make sure to update the IP addresses in `Signup.js`, `Login.js`, and `Index.js,' replacing them with your own computer's IP adress. 
 
 2. **Mobile Testing with Expo Go**:
    - Install the Expo Go app on your smartphone.
