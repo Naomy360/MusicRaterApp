@@ -5,6 +5,7 @@ const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+
   const handleLogin = async () => {
     // Perform basic validation
     if (username.length === 0 || password.length === 0) {
@@ -29,7 +30,8 @@ const Login = ({ navigation }) => {
 
       if (json.success) {
         // If login is successful, navigate to the Index (home) screen
-        navigation.navigate('Index');
+        navigation.navigate('Index', { loggedInUsername: username });
+
       } else {
         // If login is not successful, show an alert
         Alert.alert('Login Failed', json.message);

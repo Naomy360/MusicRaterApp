@@ -11,14 +11,15 @@ const Index = ({ route }) => {
   const [loggedInUsername, setLoggedInUsername] = useState('');
   const [newSong, setNewSong] = useState({ artist: '', song: '', rating: '' });
   const [updateSong, setUpdateSong] = useState({ id: '', artist: '', song: '', rating: '' });
+  const [ratingThreshold, setRatingThreshold] = useState('');
 
-  
   useEffect(() => {
     fetchSongs();
     if (route.params?.loggedInUsername) {
-      setLoggedInUsername(route.params.loggedInUsername);
+        setLoggedInUsername(route.params.loggedInUsername);
     }
-  }, [route.params?.loggedInUsername]);
+}, [route.params?.loggedInUsername]);
+
 
   const fetchSongs = async () => {
     try {
@@ -34,35 +35,37 @@ const Index = ({ route }) => {
   };
   
 
+  const isValidRating = (rating) => {
+    const num = parseInt(rating, 10);
+    return num >= 1 && num <= 5;
+  };
+
   const handleAddSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
-        Alert.alert('Invalid Rating', 'Please enter a rating between 1 and 5.');
-        return;
+      Alert.alert('Invalid Rating', 'Please enter a rating between 1 and 5.');
+      return;
     }
-
     try {
-        const response = await axios.post('http://172.21.134.19/MusicRaterApp/Public/Index.php', {
-            action: 'createRating',
-            username: loggedInUsername,
-            artist: songData.artist, 
-            song: songData.song,    
-            rating: songData.rating  
-        });
-
-        if (response.data.success) {
-            console.log('Response:', response.data.message);
-            setNewSong({ artist: '', song: '', rating: '' });
-            setCurrentView('list');
-            await fetchSongs();
-        } else {
-            Alert.alert("Rating Error", response.data.message);
-        }
+      const response = await axios.post('http://172.21.134.19/MusicRaterApp/Public/Index.php', {
+        action: 'createRating',
+        username: loggedInUsername,
+        artist: songData.artist,
+        song: songData.song,
+        rating: songData.rating
+      });
+      if (response.data.success) {
+        console.log('Response:', response.data.message);
+        setNewSong({ artist: '', song: '', rating: '' });
+        setCurrentView('list');
+        await fetchSongs();
+      } else {
+        Alert.alert("Rating Error", response.data.message);
+      }
     } catch (error) {
-        console.error('Error:', error.response ? error.response.data : error);
-        Alert.alert("Error", "An error occurred while processing your request.");
+      console.error('Error:', error.response ? error.response.data : error);
+      Alert.alert("Error", "An error occurred while processing your request.");
     }
 };
-
 
   const handleUpdateSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
@@ -77,7 +80,7 @@ const Index = ({ route }) => {
         rating: songData.rating,
         username: loggedInUsername
       });
-  
+
       if (response.data && response.data.success) {
         console.log('Rating updated successfully:', response.data.message);
         setUpdateSong({ id: '', artist: '', song: '', rating: '' });
@@ -98,7 +101,6 @@ const Index = ({ route }) => {
       const response = await axios.delete('http://172.21.134.19/MusicRaterApp/Public/Index.php', {
         data: { id: selectedSong.id }
       });
-
       if (response.data && response.data.success) {
         console.log('Rating deleted successfully:', response.data.message);
         setSelectedSong(null);
@@ -111,65 +113,66 @@ const Index = ({ route }) => {
       console.error('Error deleting song rating:', error.response ? error.response.data : error);
     }
   };
-  
-  
-  const SongList = () => (
-    <FlatList
-      data={songs}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.songItem}
-          onPress={() => {
-            setSelectedSong(item);
-            setCurrentView('details'); // Set the view to 'details' when an item is pressed
-          }}
-        >
-          <Text style={styles.songTitle}>{item.song} by {item.artist}</Text>
-  
-          <View style={styles.rating}>
-            {Array.from({ length: 5 }, (_, index) => (
-              <Icon
-                key={index}
-                name="star"
-                size={15}
-                color={index < item.rating ? '#FFD700' : '#CCC'}
-              />
-            ))}
-          </View>
-  
-          {item.username === loggedInUsername && (
-            <View style={styles.buttonGroup}>
-              <TouchableOpacity
-                style={styles.updateButton}
-                onPress={() => {
-                  setUpdateSong({
-                    id: item.id,
-                    artist: item.artist,
-                    song: item.song,
-                    rating: item.rating.toString()
-                  });
-                  setCurrentView('update');
-                }}
-              >
-                <Icon name="edit" size={20} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => {
-                  setSelectedSong(item);
-                  setCurrentView('delete');
-                }}
-              >
-                <Icon name="trash" size={20} color="#FFFFFF" />
-              </TouchableOpacity>
+
+
+  const FilteredSongList = () => {
+    const filteredSongs = songs.filter(song => song.rating >= parseInt(ratingThreshold, 10) || ratingThreshold === '');
+
+    return (
+      <FlatList
+        data={filteredSongs}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.songItem}
+            onPress={() => {
+              setSelectedSong(item);
+              setCurrentView('details');
+            }}
+          >
+            <Text style={styles.songTitle}>{item.song} by {item.artist}</Text>
+            <View style={styles.rating}>
+              {Array.from({ length: 5 }, (_, index) => (
+                <Icon
+                  key={index}
+                  name="star"
+                  size={15}
+                  color={index < item.rating ? '#FFD700' : '#CCC'}
+                />
+              ))}
             </View>
-          )}
-        </TouchableOpacity>
-      )}
-      keyExtractor={(item) => item.id.toString()}
-    />
-  );
-  
+            {item.username === loggedInUsername && (
+              <View style={styles.buttonGroup}>
+                <TouchableOpacity
+                  style={styles.updateButton}
+                  onPress={() => {
+                    setUpdateSong({
+                      id: item.id,
+                      artist: item.artist,
+                      song: item.song,
+                      rating: item.rating.toString()
+                    });
+                    setCurrentView('update');
+                  }}
+                >
+                  <Icon name="edit" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => {
+                    setSelectedSong(item);
+                    setCurrentView('delete');
+                  }}
+                >
+                  <Icon name="trash" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item.id.toString()}
+      />
+    );
+  };
   
   const AddSongForm = () => {
     const [localSong, setLocalSong] = useState({ ...newSong });
@@ -289,6 +292,55 @@ const Index = ({ route }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'list':
+        return (
+          <>
+            <View style={styles.formContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Search by minimum rating (1-5)"
+                keyboardType="numeric"
+                value={ratingThreshold}
+                onChangeText={setRatingThreshold}
+              />
+            </View>
+            <FilteredSongList />
+          </>
+        );
+      case 'add':
+        return <AddSongForm />;
+      case 'update':
+        return <UpdateSongForm />;
+      case 'delete':
+        return <DeleteConfirmation />;
+      case 'details':
+        return <SongDetails />;
+      default:
+        return <SongList />;
+    }
+  };
+
+  const SongDetails = () => {
+    // Ensure selectedSong is not null
+    if (!selectedSong) return null;
+  
+    return (
+      <View style={styles.songDetailContainer}>
+        <Text style={styles.songDetailTitle}>{selectedSong.song} by {selectedSong.artist}</Text>
+        <Text style={styles.songDetailText}>Rating: {selectedSong.rating}</Text>
+        {/* Add any other details you want to display here */}
+        
+        {/* Button to go back to the list */}
+        <TouchableOpacity style={styles.backButton} onPress={() => setCurrentView('list')}>
+          <Text style={styles.buttonText}>Back to List</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+ 
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'list':
         return <SongList />;
       case 'add':
         return <AddSongForm />;
@@ -305,9 +357,7 @@ const Index = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      {/* Display Logged In User's Name */}
       <Text style={styles.usernameDisplay}>Username: {loggedInUsername}</Text>
-
       {renderContent()}
       {currentView === 'list' && (
         <TouchableOpacity style={styles.addButton} onPress={() => setCurrentView('add')}>
@@ -318,6 +368,7 @@ const Index = ({ route }) => {
   );
 };
 
+  
 const styles = StyleSheet.create({
   container: {
     flex: 1,

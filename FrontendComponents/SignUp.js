@@ -37,8 +37,9 @@ const SignUp = ({ navigation }) => {
 
       const json = await response.json();
 
-      if (json.success) { // Modify this to check the success attribute
-        navigation.navigate('Index'); // Navigate to the Index page on success
+      if (json.success) { 
+        navigation.navigate('Index', { loggedInUsername: username });
+ // Navigate to the Index page on success
       } else {
         Alert.alert('Registration Failed', json.message || 'You could not be registered at this time.');
       }
@@ -122,5 +123,4 @@ const styles = StyleSheet.create({
 });
 
 export default SignUp;
-
 
