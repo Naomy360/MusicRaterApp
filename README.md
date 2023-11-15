@@ -1,7 +1,7 @@
 # FaveTune
 Fourth homework assignment for COMP333: a music rater app called FaveTune developed by Jackson McAvoy and Naomy Chepngeno. 
 
-Worksplit: 50/50 (we worked on a lot of code together, so the difference in commits does not reflect the actual work split) 
+Worksplit: 50/50 (we worked on a lot of code together, so the difference in commits does not reflect the actual work split). Jackson had several computer issues that made him unable to test the code on his computer, so it was simpler to use one computer.
 
 DISCLAIMER: ChatGPT (OpenAI, 2023) was used for debugging
 
@@ -25,7 +25,7 @@ The application first asks the user to either create an account or login with th
    - Create a new database named `music-db`.
    - Create two tables:
      - `users_table` with columns: `username` (VARCHAR), `password` (VARCHAR).
-     - `ratings_table` with columns: `id` (INT, primary key), `username` (VARCHAR), `artist` (VARCHAR), `song` (VARCHAR), `rating` (INT).
+     - `ratings_table` with columns: `id` (INT, primary key, auto-increment), `username` (VARCHAR, foreign key references users_table(username)), `artist` (VARCHAR), `song` (VARCHAR), `rating` (INT(1)).
 
 3. **Clone the Repository**:
    - Open a command prompt or terminal.
@@ -39,8 +39,8 @@ The application first asks the user to either create an account or login with th
 
 1. **Setting Up Expo App**:
    - Open a terminal.
-   - Run `npx create-expo-app musicraterapp` to initialize a new Expo project.
-   - Move into the project directory with `cd musicraterapp`.
+   - Run `npx create-expo-app MusicRaterApp` to initialize a new Expo project.
+   - Move into the project directory with `cd MusicRaterApp`.
 
 2. **Start the Expo Server**:
    - Execute `npx expo start` to start the Expo development server.
@@ -56,6 +56,12 @@ The application first asks the user to either create an account or login with th
 2. **Mobile Testing with Expo Go**:
    - Install the Expo Go app on your smartphone.
    - Scan the QR code displayed in your terminal after running `npx expo start`.
+3. **Mobile Testing with Android Emulator**
+   - Install Android Studio
+   - Ensure the file directory points to ./node.js/MusicRaterApp
+   - Install Pixel 5 with API 31 from the Device Manager
+   - Execute "npx expo start" from the terminal
+   - Press the 'a' key to start the Android app (if there is any trouble, press the 'r' key to reload the app)
 
 ## MVC architecturer and REST API
 
