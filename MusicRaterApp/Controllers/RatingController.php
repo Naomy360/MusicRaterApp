@@ -9,8 +9,14 @@ class RatingController {
     }
 
     public function createRating($username, $artist, $song, $rating) {
-        return $this->model->addRating($username, $artist, $song, $rating);
+        if ($this->model->ratingExists($username, $artist, $song)) {
+            return ['success' => false, 'message' => 'You have already rated this song'];
+        }
+        // Insert rating logic remains the same
+        return ['success' => true, 'message' => 'Rating added successfully', 'data' => $this->model->addRating($username, $artist, $song, $rating)];
     }
+    
+    
 
     public function getRatings() {
         return $this->model->getAllRatings();
@@ -24,4 +30,5 @@ class RatingController {
         return $this->model->deleteRating($id);
     }
 }
+
 
