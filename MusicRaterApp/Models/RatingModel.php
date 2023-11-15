@@ -14,6 +14,11 @@ class RatingModel {
         $stmt->execute([$username, $artist, $song, $rating]);
         return $stmt->rowCount();
     }
+    public function ratingExists($username, $artist, $song) {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM ratings_table WHERE username = ? AND artist = ? AND song = ?");
+        $stmt->execute([$username, $artist, $song]);
+        return $stmt->fetchColumn() > 0;
+    }
 
     public function getAllRatings() {
         $stmt = $this->db->query("SELECT * FROM ratings_table");
@@ -33,5 +38,6 @@ class RatingModel {
         return $stmt->rowCount();
     }
 }
+
 
 
