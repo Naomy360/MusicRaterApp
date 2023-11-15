@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 
 const Index = ({ route }) => {
+
   const [songs, setSongs] = useState([]);
   const [currentView, setCurrentView] = useState('list');
   const [selectedSong, setSelectedSong] = useState(null);
@@ -28,6 +29,11 @@ const Index = ({ route }) => {
       console.error('Error fetching songs:', error);
     }
   };
+  const isValidRating = (rating) => {
+    const num = parseInt(rating, 10);
+    return num >= 1 && num <= 5;
+  };
+  
 
   const isValidRating = (rating) => {
     const num = parseInt(rating, 10);
@@ -59,7 +65,7 @@ const Index = ({ route }) => {
       console.error('Error:', error.response ? error.response.data : error);
       Alert.alert("Error", "An error occurred while processing your request.");
     }
-  };
+};
 
   const handleUpdateSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
@@ -74,6 +80,7 @@ const Index = ({ route }) => {
         rating: songData.rating,
         username: loggedInUsername
       });
+
       if (response.data && response.data.success) {
         console.log('Rating updated successfully:', response.data.message);
         setUpdateSong({ id: '', artist: '', song: '', rating: '' });
@@ -86,6 +93,8 @@ const Index = ({ route }) => {
       console.error('Error updating song rating:', error.response ? error.response.data : error);
     }
   };
+  
+ 
 
   const handleDeleteSong = async () => {
     try {
@@ -104,6 +113,7 @@ const Index = ({ route }) => {
       console.error('Error deleting song rating:', error.response ? error.response.data : error);
     }
   };
+
 
   const FilteredSongList = () => {
     const filteredSongs = songs.filter(song => song.rating >= parseInt(ratingThreshold, 10) || ratingThreshold === '');
@@ -303,6 +313,42 @@ const Index = ({ route }) => {
       case 'delete':
         return <DeleteConfirmation />;
       case 'details':
+        return <SongDetails />;
+      default:
+        return <SongList />;
+    }
+  };
+
+  const SongDetails = () => {
+    // Ensure selectedSong is not null
+    if (!selectedSong) return null;
+  
+    return (
+      <View style={styles.songDetailContainer}>
+        <Text style={styles.songDetailTitle}>{selectedSong.song} by {selectedSong.artist}</Text>
+        <Text style={styles.songDetailText}>Rating: {selectedSong.rating}</Text>
+        {/* Add any other details you want to display here */}
+        
+        {/* Button to go back to the list */}
+        <TouchableOpacity style={styles.backButton} onPress={() => setCurrentView('list')}>
+          <Text style={styles.buttonText}>Back to List</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+ 
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'list':
+        return <SongList />;
+      case 'add':
+        return <AddSongForm />;
+      case 'update':
+        return <UpdateSongForm />;
+      case 'delete':
+        return <DeleteConfirmation />;
+      case 'details': // New case for song details
         return <SongDetails />;
       default:
         return <SongList />;
