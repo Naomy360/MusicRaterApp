@@ -3,7 +3,9 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Alert } 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+
 const Index = ({ route }) => {
+
   const [songs, setSongs] = useState([]);
   const [currentView, setCurrentView] = useState('list');
   const [selectedSong, setSelectedSong] = useState(null);
@@ -33,6 +35,11 @@ const Index = ({ route }) => {
       console.error('Error fetching songs:', error);
     }
   };
+  const isValidRating = (rating) => {
+    const num = parseInt(rating, 10);
+    return num >= 1 && num <= 5;
+  };
+  
 
   const isValidRating = (rating) => {
     const num = parseInt(rating, 10);
@@ -64,7 +71,7 @@ const Index = ({ route }) => {
       console.error('Error:', error.response ? error.response.data : error);
       Alert.alert("Error", "An error occurred while processing your request.");
     }
-  };
+};
 
   const handleUpdateSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
@@ -91,6 +98,8 @@ const Index = ({ route }) => {
       console.error('Error updating song rating:', error.response ? error.response.data : error);
     }
   };
+  
+ 
 
   const handleDeleteSong = async () => {
     try {
@@ -110,6 +119,8 @@ const Index = ({ route }) => {
     }
   };
 
+  
+  
   const FilteredSongList = () => {
     const filteredSongs = songs.filter(song => song.rating >= parseInt(ratingThreshold, 10) || ratingThreshold === '');
 
@@ -250,7 +261,6 @@ const Index = ({ route }) => {
       </View>
     );
   };
-  
 
 
   const DeleteConfirmation = () => (
@@ -313,6 +323,7 @@ const Index = ({ route }) => {
         return <SongList />;
     }
   };
+
 
   return (
     <View style={styles.container}>

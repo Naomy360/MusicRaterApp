@@ -27,11 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = $userController->logIn($data->username, $data->password);
                 $message = $success ? 'Login successful' : 'Invalid username or password';
                 break;
-            case 'createRating':
-                $result = $ratingController->createRating($data->username, $data->artist, $data->song, $data->rating);
-                $success = $result > 0;
-                $message = $success ? 'Rating added successfully' : 'Failed to add rating';
-                break;
+                case 'createRating':
+                    $result = $ratingController->createRating($data->username, $data->artist, $data->song, $data->rating);
+                    $success = $result['success'];
+                    $message = $result['message'];
+                    break;
             default:
                 $success = false;
                 $message = 'No action specified or action is invalid.';
