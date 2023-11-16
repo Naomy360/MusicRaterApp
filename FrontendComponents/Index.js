@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const Index = ({ route }) => {
 
+  // State variables
   const [songs, setSongs] = useState([]);
   const [currentView, setCurrentView] = useState('list');
   const [selectedSong, setSelectedSong] = useState(null);
@@ -15,6 +16,7 @@ const Index = ({ route }) => {
   const [ratingThreshold, setRatingThreshold] = useState('');
   const navigation = useNavigation();
 
+  // Function to navigate back to the Login screen
   const handleExit = () => {
     navigation.navigate('Login');
   };
@@ -24,9 +26,9 @@ const Index = ({ route }) => {
     if (route.params?.loggedInUsername) {
         setLoggedInUsername(route.params.loggedInUsername);
     }
-}, [route.params?.loggedInUsername]);
+  }, [route.params?.loggedInUsername]);
 
-
+  // Function to fetch songs from the server
   const fetchSongs = async () => {
     try {
       const response = await axios.get('http://172.21.134.19/MusicRaterApp/Public/Index.php');
@@ -35,13 +37,14 @@ const Index = ({ route }) => {
       console.error('Error fetching songs:', error);
     }
   };
-  
+
+  // Function to check if a rating is valid
   const isValidRating = (rating) => {
     const num = parseInt(rating, 10);
     return num >= 1 && num <= 5;
   };
-  
 
+  // Function to handle adding a new song
   const handleAddSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
       Alert.alert('Invalid Rating', 'Please enter a rating between 1 and 5.');
@@ -67,8 +70,9 @@ const Index = ({ route }) => {
       console.error('Error:', error.response ? error.response.data : error);
       Alert.alert("Error", "An error occurred while processing your request.");
     }
-};
+  };
 
+  // Function to handle updating an existing song
   const handleUpdateSong = async (songData) => {
     if (!isValidRating(songData.rating)) {
       Alert.alert('Invalid Rating', 'Please enter a rating between 1 and 5.');
@@ -94,9 +98,8 @@ const Index = ({ route }) => {
       console.error('Error updating song rating:', error.response ? error.response.data : error);
     }
   };
-  
- 
 
+  // Function to handle deleting a song
   const handleDeleteSong = async () => {
     try {
       const response = await axios.delete('http://172.21.134.19/MusicRaterApp/Public/Index.php', {
@@ -115,8 +118,7 @@ const Index = ({ route }) => {
     }
   };
 
-  
-  
+  // Component to render the filtered song list based on the rating threshold
   const FilteredSongList = () => {
     const filteredSongs = songs.filter(song => song.rating >= parseInt(ratingThreshold, 10) || ratingThreshold === '');
 
@@ -175,14 +177,15 @@ const Index = ({ route }) => {
       />
     );
   };
-  
+
+  // Component for the Add Song form
   const AddSongForm = () => {
     const [localSong, setLocalSong] = useState({ ...newSong });
-  
+
     const handleSubmit = async () => {
       await handleAddSong(localSong); // Directly pass localSong here
     };
-  
+
     return (
       <View style={styles.formContainer}>
         <TextInput
@@ -241,104 +244,148 @@ const Index = ({ route }) => {
           value={localUpdateSong.song}
           onChangeText={(text) => setLocalUpdateSong({ ...localUpdateSong, song: text })}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Rating"
-          keyboardType="numeric"
-          value={localUpdateSong.rating}
-          onChangeText={(text) => setLocalUpdateSong({ ...localUpdateSong, rating: text })}
-        />
-        <TouchableOpacity style={styles.submitButton} onPress={handleUpdateSubmit}>
-          <Text style={styles.buttonText}>Update</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Rating (1-5)"
+            keyboardType="numeric"
+            value={localSong.rating}
+            onChangeText={(text) => setLocalSong({ ...localSong, rating: text })}
+          />
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => setCurrentView('list')}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    };
+
+    // Component for the Update Song form
+    const UpdateSongForm = () => {
+      const [localUpdateSong, setLocalUpdateSong] = useState({ ...updateSong });
+
+      const handleUpdateSubmit = async () => {
+        setUpdateSong(localUpdateSong);
+        await handleUpdateSong(localUpdateSong); // Pass localUpdateSong
+      };
+
+      useEffect(() => {
+        setLocalUpdateSong({ ...updateSong });
+      }, [updateSong]);
+
+      return (
+        <View style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Artist"
+            value={localUpdateSong.artist}
+            onChangeText={(text) => setLocalUpdateSong({ ...localUpdateSong, artist: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Song"
+            value={localUpdateSong.song}
+            onChangeText={(text) => setLocalUpdateSong({ ...localUpdateSong, song: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Rating"
+            keyboardType="numeric"
+            value={localUpdateSong.rating}
+            onChangeText={(text) => setLocalUpdateSong({ ...localUpdateSong, rating: text })}
+          />
+          <TouchableOpacity style={styles.submitButton} onPress={handleUpdateSubmit}>
+            <Text style={styles.buttonText}>Update</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => setCurrentView('list')}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    };
+
+    // Component for the Delete Confirmation
+    const DeleteConfirmation = () => (
+      <View style={styles.deleteContainer}>
+        <Text style={styles.confirmationText}>Are you sure you want to remove this song?</Text>
+        <TouchableOpacity style={styles.submitButton} onPress={handleDeleteSong}>
+          <Text style={styles.buttonText}>Remove</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cancelButton} onPress={() => setCurrentView('list')}>
           <Text style={styles.buttonText}>Cancel</Text>
         </TouchableOpacity>
       </View>
     );
-  };
 
+    // Component for displaying Song Details
+    const SongDetails = () => {
+      // Ensure selectedSong is not null
+      if (!selectedSong) return null;
 
-  const DeleteConfirmation = () => (
-    <View style={styles.deleteContainer}>
-      <Text style={styles.confirmationText}>Are you sure you want to remove this song?</Text>
-      <TouchableOpacity style={styles.submitButton} onPress={handleDeleteSong}>
-        <Text style={styles.buttonText}>Remove</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.cancelButton} onPress={() => setCurrentView('list')}>
-        <Text style={styles.buttonText}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
-  );
+      return (
+        <View style={styles.songDetailContainer}>
+          <Text style={styles.songDetailTitle}>{selectedSong.song} by {selectedSong.artist}</Text>
+          <Text style={styles.songDetailText}>Rating: {selectedSong.rating}</Text>
+          {/* Add any other details you want to display here */}
+          
+          {/* Button to go back to the list */}
+          <TouchableOpacity style={styles.backButton} onPress={() => setCurrentView('list')}>
+            <Text style={styles.buttonText}>Back to List</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    };
 
-  const SongDetails = () => {
-    // Ensure selectedSong is not null
-    if (!selectedSong) return null;
-  
+    // Function to render content based on the current view
+    const renderContent = () => {
+      switch (currentView) {
+        case 'list':
+          return (
+            <>
+              <View style={styles.formContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Search by minimum rating (1-5)"
+                  keyboardType="numeric"
+                  value={ratingThreshold}
+                  onChangeText={setRatingThreshold}
+                />
+              </View>
+              <FilteredSongList />
+            </>
+          );
+        case 'add':
+          return <AddSongForm />;
+        case 'update':
+          return <UpdateSongForm />;
+        case 'delete':
+          return <DeleteConfirmation />;
+        case 'details':
+          return <SongDetails />;
+        default:
+          return <FilteredSongList />;
+      }
+    };
+
+    // Main component rendering the Index screen
     return (
-      <View style={styles.songDetailContainer}>
-        <Text style={styles.songDetailTitle}>{selectedSong.song} by {selectedSong.artist}</Text>
-        <Text style={styles.songDetailText}>Rating: {selectedSong.rating}</Text>
-        {/* Add any other details you want to display here */}
-        
-        {/* Button to go back to the list */}
-        <TouchableOpacity style={styles.backButton} onPress={() => setCurrentView('list')}>
-          <Text style={styles.buttonText}>Back to List</Text>
+      <View style={styles.container}>
+        <Text style={styles.usernameDisplay}>Username: {loggedInUsername}</Text>
+        {renderContent()}
+        {currentView === 'list' && (
+          <TouchableOpacity style={styles.addButton} onPress={() => setCurrentView('add')}>
+            <Text style={styles.buttonText}>Add New Rating</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
+          <Text style={styles.buttonText}>Exit</Text>
         </TouchableOpacity>
       </View>
     );
   };
- 
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'list':
-        return (
-          <>
-            <View style={styles.formContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Search by minimum rating (1-5)"
-                keyboardType="numeric"
-                value={ratingThreshold}
-                onChangeText={setRatingThreshold}
-              />
-            </View>
-            <FilteredSongList />
-          </>
-        );
-      case 'add':
-        return <AddSongForm />;
-      case 'update':
-        return <UpdateSongForm />;
-      case 'delete':
-        return <DeleteConfirmation />;
-      case 'details':
-        return <SongDetails />;
-      default:
-        return <SongList />;
-    }
-  };
-
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.usernameDisplay}>Username: {loggedInUsername}</Text>
-      {renderContent()}
-      {currentView === 'list' && (
-        <TouchableOpacity style={styles.addButton} onPress={() => setCurrentView('add')}>
-          <Text style={styles.buttonText}>Add New Rating</Text>
-        </TouchableOpacity>
-      )}
-       <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
-        <Text style={styles.buttonText}>Exit</Text>
-      </TouchableOpacity>
-    </View>
-  );
- 
-};
-
-  
+// Styles for the components
 const styles = StyleSheet.create({
   container: {
     flex: 1,
